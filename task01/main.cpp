@@ -30,6 +30,33 @@ Eigen::Matrix<double,4,4,Eigen::RowMajor> GetHomographicTransformation(
   // (c0[1][0],c0[][1],z) -> (c1[1][0],c1[1][1],z)
   // (c0[2][0],c0[][1],z) -> (c1[2][0],c1[2][1],z)
   // (c0[3][0],c0[][1],z) -> (c1[3][0],c1[3][1],z)
+  
+  // A is a (8x9) matrix containing the equations that map the corners to their destination
+  //separated from the coefficients of the homographic matrix
+  Eigen::Matrix<double, 8, 9> A;
+  A <<
+        c0[0][0], c0[0][1], 1, 0, 0, 0, -c0[0][0] * c1[0][0], -c0[0][1] * c1[0][0], -c1[0][0],
+        0, 0, 0, c0[0][0], c0[0][1], 1, -c0[0][0] * c1[0][1], -c0[0][1] * c1[0][1], -c1[0][1],
+        c0[1][0], c0[1][1], 1, 0, 0, 0, -c0[1][0] * c1[1][0], -c0[1][1] * c1[1][0], -c1[1][0],
+        0, 0, 0, c0[1][0], c0[1][1], 1, -c0[1][0] * c1[1][1], -c0[1][1] * c1[1][1], -c1[1][1],
+        c0[2][0], c0[2][1], 1, 0, 0, 0, -c0[2][0] * c1[2][0], -c0[2][1] * c1[2][0], -c1[2][0],
+        0, 0, 0, c0[2][0], c0[2][1], 1, -c0[2][0] * c1[2][1], -c0[2][1] * c1[2][1], -c1[2][1],
+        c0[3][0], c0[3][1], 1, 0, 0, 0, -c0[3][0] * c1[3][0], -c0[3][1] * c1[3][0], -c1[3][0],
+        0, 0, 0, c0[3][0], c0[3][1], 1, -c0[3][0] * c1[3][1], -c0[3][1] * c1[3][1], -c1[3][1];
+
+  // A*h = 0, it can be shown that (A^T*A)*h = 0. Since h is equal to the eigenvector V of (A^T*A),
+  // whereby V is one of the singular vector from the SVD of A, the last column vector of V
+  // corresponds to the smallest singular value (~ 0) which satisfies A*h = 0 or (A^T*A)*h = 0 for non-trivial solution of h.
+  Eigen::JacobiSVD<Eigen::Matrix<double, 9, 9>, Eigen::ComputeFullU | Eigen::ComputeFullV> svd(A);
+  Eigen::Matrix<double, 9, 1> h = svd.matrixV().col(8);
+
+  // homographic matrix is 3x3 for {x, y, 1}. However, OpenGL works with z-axis too, as in {x, y, z, 1}
+  // Additional 3rd row and 3rd column must be inserted in between the H matrix to get the model-view matrix
+  m <<
+      h(0, 0), h(1, 0), 0, h(2, 0),
+      h(3, 0), h(4, 0), 0, h(5, 0),
+      0,       0,       1,       0,
+      h(6, 0), h(7, 0), 0, h(8, 0);
 
   return m;
 }
