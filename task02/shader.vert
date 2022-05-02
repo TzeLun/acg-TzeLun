@@ -30,8 +30,26 @@ void main()
     // the "back" direction (i.e., +Z direction) will be projected as the unit circle in XY plane.
     // in GLSL, you can use built-in math function (e.g., sqrt, atan).
     // look at page 56 of https://www.khronos.org/registry/OpenGL/specs/gl/GLSLangSpec.1.20.pdf
-    float x1 = x0;
-    float y1 = y0;
+
+    // direction vector in which the lens is facing. Along the optical axis
+    vec3 lens_Direction = vec3(0.0f, 0.0f, -1.0f);
+
+    // light ray. Line passing through the lens and the vertex point
+    vec3 light_ray = normalize(gl_Vertex.xyz - vec3(0.0f, 0.0f, cam_z_pos));
+
+    // the angle between the ray of light from a vertex point to the optical axis
+    float theta = acos(dot(lens_Direction, light_ray) / (length(lens_Direction) * length(light_ray)));
+
+    // radial position of the point from the center (unit circle)
+    float r = 1.0f;
+
+    // find the focal length
+    float f = r / theta;
+
+    // assign focal length to the x and y coordinate as a simple perspective transformation
+    float x1 = f * x0;
+    float y1 = f * y0;
     float z1 = z0;
+
     gl_Position = vec4(x1,y1,z1,1); // homogenious coordinate
 }
