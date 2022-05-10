@@ -26,8 +26,16 @@ float SDF(vec3 pos)
   // Look Inigo Quilez's article for hints:
   // https://iquilezles.org/articles/distfunctions/
 
-  // for "problem2" the code below is not used.
-  return sdf_box(pos, vec3(0.1,0.2,0.3));
+  // parameters
+  float rbig = 0.8;
+  float rsmall = 0.12;
+
+  // Multiple small sphere throughout the grid
+  float interval = 0.2;
+  vec3 spos = mod(pos + interval * 0.5,interval) - interval * 0.5;
+
+  // boolean subtraction
+  return max((length(pos) - rbig), -(length(spos) - rsmall));
 }
 
 void main()
