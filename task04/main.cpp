@@ -49,28 +49,28 @@ double SamplingHemisphere(
   // hint4: first assume z is the up in the polar coordinate, then rotate the sampled direction such that "z" will be up.
   // write some codes below (5-10 lines)
 
+    // generate random variables for theta [0, pi/2) and phi [0, 2*pi), r = 1 since unit hemisphere
+    double r = 1.0;
+    const auto var0 = dfm2::MyERand48<double>(Xi); // for theta
+    const auto var1 = dfm2::MyERand48<double>(Xi); // for phi
 
-  // below: naive implementation to "uniformly" sample hemisphere using "rejection sampling"
-  // to not be used for the "problem2" in the assignment
-  for(int i=0;i<10;++i) { // 10 is a magic number
-    const auto d0 = dfm2::MyERand48<double>(Xi);  // you can sample uniform distribution [0,1] with this function
-    const auto d1 = dfm2::MyERand48<double>(Xi);
-    const auto d2 = dfm2::MyERand48<double>(Xi);
-    dir[0] = d0 * 2 - 1; // dir[0] -> [-1,+1]
-    dir[1] = d1 * 2 - 1;
-    dir[2] = d2 * 2 - 1;
-    double len = std::sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
-    if( len > 1 ){ continue; } // reject if outside the unit sphere
-    if( len < 1.0e-5 ){ continue; }
-    // project on the surface of the unit sphere
-    dir[0] /= len;
-    dir[1] /= len;
-    dir[2] /= len;
-    double cos = nrm[0]*dir[0] + nrm[1]*dir[1] + nrm[2]*dir[2]; // cosine weight
-    if( cos < 0 ){ continue; }
-    return cos*2;  // (coefficient=1/M_PI) * (area_of_hemisphere=M_PI*2) = 2
-  }
-  return 0;
+    // inverse transform of the variables
+    double theta = asin(sqrt(var0));
+    double phi = 2 * M_PI * var1;
+
+    // apply transformation to x, y, z in order using spherical coordinates
+    dir[0] = r * sin(theta) * cos(phi);
+    dir[1] = r * sin(theta) * sin(phi);
+    dir[2] = r * cos(theta);
+
+    // normalized the omega (solid angle) vector
+    double len = sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+    dir[0] = dir[0] / len;
+    dir[1] = dir[1] / len;
+    dir[2] = dir[2] / len;
+
+    // return the cosine weight
+    return (dir[0] * nrm[0] + dir[1] * nrm[1] + dir[2] * nrm[2]);
 }
 
 double SampleAmbientOcclusion(
