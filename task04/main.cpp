@@ -69,6 +69,21 @@ double SamplingHemisphere(
     dir[1] = dir[1] / len;
     dir[2] = dir[2] / len;
 
+    // rotate the omega such that z-axis is now pointing upwards (on screen)
+    // achievable by rotating -90 deg about the x-axis
+    std::vector<double> dir2 = { dir[0], dir[1], dir[2] };
+    delfem2::Rotate_Points3(dir2, -M_PI/2.0, 0.0, 0.0);
+
+    dir[0] = dir2[0];
+    dir[1] = dir2[1];
+    dir[2] = dir2[2];
+
+    // re-normalized the omega (solid angle) vector
+    len = sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+    dir[0] = dir[0] / len;
+    dir[1] = dir[1] / len;
+    dir[2] = dir[2] / len;
+
     // return the cosine weight
     return (dir[0] * nrm[0] + dir[1] * nrm[1] + dir[2] * nrm[2]);
 }
