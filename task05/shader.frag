@@ -155,9 +155,11 @@ void main()
 
   // the following three lines of function is not used for Problem2
   // The code is here to give the idea what the cubic Bezier curve looks like
+  /*
   for(int i=0;i<10;++i){
     Distance = min(Distance, length(EvaluateBezier(0.1*i, bezier)));
   }
+  */
 
   // this is the structure to store the range
   struct range {
@@ -170,7 +172,7 @@ void main()
   int nstack = 1;
   stack[0] = range(0., 1., SturmNumber(0.,sturm_seq), SturmNumber(1.,sturm_seq)); // initial range
   while(nstack>0){ // finding roots using bisection method
-    nstack = nstack-1;
+    nstack = nstack - 1;
     float lower = stack[nstack].lower;
     float upper = stack[nstack].upper;
     float middle = (lower + upper)*0.5;
@@ -182,9 +184,15 @@ void main()
     int snl = stack[nstack].sturm_lower;
     int snu = stack[nstack].sturm_upper;
     if( snl == snu ){ continue; }
-    // Problem2 of the assignment
-    // write some code to complete the implementation of bisection method
-    // around 10 lines of code should be enough
+
+    // snu - snl > 1 : root isolation starts here
+    range leftInterval = { lower, middle, SturmNumber(lower, sturm_seq), SturmNumber(middle, sturm_seq) };
+    range rightInterval = { middle, upper, SturmNumber(middle, sturm_seq), SturmNumber(upper, sturm_seq) };
+    stack[nstack] = leftInterval;
+    nstack = nstack + 1;
+    stack[nstack] = rightInterval;
+    nstack = nstack + 1;
+    
   }
 
 
