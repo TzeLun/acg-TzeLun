@@ -130,6 +130,14 @@ int main() {
       // Adjust the coefficient LM algorithm such that the energy decrease after updating "arb.angle".
       // The implementation should be 3-5 in lines.
 
+      // the LM coefficient, lambda = 1 / alpha
+      double lambda = 1.25;
+      // the LM algorithm
+      Eigen::Matrix<double, 8, 8> H = (diff_pos_def.transpose() * diff_pos_def) + lambda * Eigen::MatrixXd::Identity(8, 8); // (J.transpose * J + lambda * I)
+      Eigen::Matrix<double, 8, 1> G = diff_pos_def.transpose() * (pos_def - pos_trg);  // (J.transpose * residual)
+      Eigen::Matrix<double, 8, 1> delta_angle = -H.inverse() * G;
+      arb.angle = angle0 + delta_angle;
+
       // editing ends here
       arb.UpdateTransformations();
       double W1 = 0.5*(arb.pos_def - pos_trg).dot(arb.pos_def - pos_trg); // energy after update
