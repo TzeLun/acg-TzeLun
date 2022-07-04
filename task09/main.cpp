@@ -43,7 +43,9 @@ Eigen::MatrixXd CppPoissonBlending(
         const double ret_e = ret(ret_i+1, ret_j);
         const double ret_w = ret(ret_i-1, ret_j);
         // write some code here to implement Poisson image editing
-        double ret_c = src_c; // change this line
+        double sum_of_ret_pixels = ret_n + ret_s + ret_e + ret_w;
+        double sum_of_src_pixels = src_n + src_s + src_e + src_w;
+        double ret_c = (sum_of_ret_pixels + 4 * src_c - sum_of_src_pixels) / 4.0; // change this line
         // no edit below
         ret_c = (ret_c>255.) ? 255. : ret_c; // clamp
         ret_c = (ret_c<0.) ? 0. : ret_c; // clamp
